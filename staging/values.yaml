@@ -1,0 +1,208 @@
+global: {}
+argocd-config:
+  repoUrl: "http://gogs.tools:3000/toolkit/gitops.git"
+  project: toolkit-staging
+  applicationTargets:
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project01-staging
+      applications:
+        - name: staging-project01-app
+          path: staging/project01/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project02-staging
+      applications:
+        - name: staging-project02-app
+          path: staging/project02/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project03-staging
+      applications:
+        - name: staging-project03-app
+          path: staging/project03/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project04-staging
+      applications:
+        - name: staging-project04-app
+          path: staging/project04/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project05-staging
+      applications:
+        - name: staging-project05-app
+          path: staging/project05/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project06-staging
+      applications:
+        - name: staging-project06-app
+          path: staging/project06/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project07-staging
+      applications:
+        - name: staging-project07-app
+          path: staging/project07/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project08-staging
+      applications:
+        - name: staging-project08-app
+          path: staging/project08/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project09-staging
+      applications:
+        - name: staging-project09-app
+          path: staging/project09/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project10-staging
+      applications:
+        - name: staging-project10-app
+          path: staging/project10/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project11-staging
+      applications:
+        - name: staging-project11-app
+          path: staging/project11/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project12-staging
+      applications:
+        - name: staging-project12-app
+          path: staging/project12/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project13-staging
+      applications:
+        - name: staging-project13-app
+          path: staging/project13/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project14-staging
+      applications:
+        - name: staging-project14-app
+          path: staging/project14/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: project15-staging
+      applications:
+        - name: staging-project15-app
+          path: staging/project15/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-app
+          path: staging/projectdemo/app
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-node-react
+          path: staging/projectdemo/node-react
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-node-angular
+          path: staging/projectdemo/node-angular
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-graphql-typescript
+          path: staging/projectdemo/graphql-typescript
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-node-typescript
+          path: staging/projectdemo/node-typescript
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-java-spring
+          path: staging/projectdemo/java-spring
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-go-gin
+          path: staging/projectdemo/go-gin
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-java-quarkus
+          path: staging/projectdemo/java-quarkus
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-java-liberty
+          path: staging/projectdemo/java-liberty
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-inventory-management-svc-solution
+          path: staging/projectdemo/inventory-management-svc-solution
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-inventory-management-bff-solution
+          path: staging/projectdemo/inventory-management-bff-solution
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-inventory-management-ui-solution
+          path: staging/projectdemo/inventory-management-ui-solution
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-appmod-liberty-toolkit
+          path: staging/projectdemo/appmod-liberty-toolkit
+          type: helm
+    - targetRevision: master
+      createNamespace: true
+      targetNamespace: projectdemo-staging
+      applications:
+        - name: staging-projectdemo-ai-model-object-detector
+          path: staging/projectdemo/ai-model-object-detector
+          type: helm
