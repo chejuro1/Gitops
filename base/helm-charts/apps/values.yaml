@@ -1,0 +1,377 @@
+###############################################################################
+# Copyright 2019,2021 IBM Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###############################################################################
+
+global:
+  # Set to 'accept' to accept the license terms of WebSphere Liberty and WebSphere MQ
+  license: ''
+  useBetaFeatures: false
+  images:
+    registry: &imageRegistry minikube.local:5000
+    imageLibrary: ''
+    imagePrefix: ''
+    imageTag: latest
+    pullPolicy: Always
+  imagePullSecret:
+    secretName: ''
+    username: ''
+  hubPullSecret:
+    registry: 'https://index.docker.io/v1/'
+    secretName: ''
+    username: ''
+  timezone: 'UTC'
+  sch:
+    enabled: true
+  database:
+    ## Database connection properties
+    type: DB2
+    dbName: DATABASE
+    hostname: ''
+    port: 50000
+    username: db2admin
+    # Name of pre-created secret containing database credentals
+    credsSecretName: ''
+    # The XOR-encrypted password injected into Liberty configuration
+    wlp_psw: "{xor}Oz1tPjsyNjE="
+    # The SPM-encrypted password injected into Bootstrap.properties
+    spm_psw: "5itAmT5UzH7wR6kvkYqkTw=="
+    # Oracle Service name, where applicable
+    serviceName: ''
+    ssl:
+      enabled: false
+      # Name of the secret containing the database TLS certificate
+      secretName: ''
+      # Key in the above secret with the certificate
+      secretKey: db2admin.arm
+  apps:
+    common:
+      persistence:
+        ## Persistence volume to store data (such as non-log files)
+        enabled: false
+        ## If enabled, creates a PVC to connect to IBM Cloud Object Storage
+        ## Properties storageClassName, secretKey, accessKey, instanceId, and bucketName are required
+        ## Values available in the WebUI where the bucket was pre-created
+        # storageClassName: ""
+        # secretKey: ""
+        # accessKey: ""
+        # instanceId: ""
+        # bucketName: ""
+        # bucketEndpoint: "https://s3.private.us-south.cloud-object-storage.appdomain.cloud"
+        mountPoint: ''
+        jmxstats:
+          ## Parameters of the JMX Stats to be persisted on the PVC
+          # The property timerPeriod sets the value curam.jmx.output_statistics_timer_period in milliseconds
+          enabled: false
+          timerPeriod: 60000
+    config:
+      curam:
+        enabled: true
+        replicaCount: 1
+        producerTuning: {}
+        consumerTuning: {}
+        # consumerTuning:
+        #   replicaCount: 1
+        #   jvm: []
+        #   resources: {}
+        #   # Any keys from tuningDefaults
+        #   maxThreads: 8
+        readinessPath: /Curam/
+        ingressPath: /Curam
+        earName: Curam
+        jvm:
+          - "-Xms2048m"
+          - "-Xmx2048m"
+        resources:
+          requests:
+            cpu: 1
+            memory: 2.5Gi
+          limits:
+            cpu: 1.5
+            memory: 3Gi
+      rest:
+        enabled: false
+        replicaCount: 1
+        producerTuning: {}
+        consumerTuning: {}
+        ingressPath: /Rest
+        earName: Rest
+        warName: RestModule
+        jvm:
+          - "-Xms1536m"
+          - "-Xmx1536m"
+        resources:
+          requests:
+            cpu: 0.75
+            memory: 1.5Gi
+          limits:
+            cpu: 1.5
+            memory: 2Gi
+        readinessPath: /Rest/
+      citizenportal:
+        enabled: false
+        replicaCount: 1
+        producerTuning: {}
+        consumerTuning: {}
+        readinessPath: /CitizenPortal/
+        ingressPath: /CitizenPortal
+        earName: CitizenPortal
+        jvm:
+          - "-Xms2048m"
+          - "-Xmx2048m"
+        resources:
+          requests:
+            cpu: 1
+            memory: 2.5Gi
+          limits:
+            cpu: 1.5
+            memory: 3Gi
+      curamwebservices:
+        enabled: false
+        replicaCount: 1
+        producerTuning: {}
+        consumerTuning: {}
+        readinessPath: /CuramWS2/SOAPMonitor
+        ingressPath: /CuramWS2
+        earName: CuramWebServices
+        warName: webservices2
+        excludeJmxStats: true
+        jvm:
+          - "-Xms512m"
+          - "-Xmx512m"
+      curambirtviewer:
+        enabled: false
+        replicaCount: 1
+        producerTuning: {}
+        consumerTuning: {}
+        readinessTCPProbe: true
+        ingressPath: /CuramBIRTViewer/
+        earName: CuramBIRTViewer
+        producerOnly: true
+        excludeJmxStats: true
+        jvm:
+          - "-Xms768m"
+          - "-Xmx768m"
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 1Gi
+          limits:
+            cpu: 0.75
+            memory: 1.5Gi
+      cpmexternalns:
+        enabled: false
+        replicaCount: 1
+        producerTuning: {}
+        consumerTuning: {}
+        readinessPath: /CPMExternalNS/
+        ingressPath: /CPMExternalNS
+        earName: CPMExternalNS
+        jvm:
+          - "-Xms512m"
+          - "-Xmx512m"
+      cpmexternals:
+        enabled: false
+        replicaCount: 1
+        readinessPath: /CPMExternalS/
+        ingressPath: /CPMExternalS
+        earName: CPMExternalS
+        jvm:
+          - "-Xms512m"
+          - "-Xmx512m"
+      navigatorns:
+        enabled: false
+        replicaCount: 1
+        producerTuning: {}
+        consumerTuning: {}
+        readinessPath: /NavigatorNS/
+        ingressPath: /NavigatorNS
+        earName: NavigatorNS
+        jvm:
+          - "-Xms512m"
+          - "-Xmx512m"
+      navigators:
+        enabled: false
+        replicaCount: 1
+        producerTuning: {}
+        consumerTuning: {}
+        readinessPath: /NavigatorS/
+        ingressPath: /NavigatorS
+        earName: NavigatorS
+        jvm:
+          - "-Xms512m"
+          - "-Xmx512m"
+      mdtworkspace:
+        enabled: false
+        replicaCount: 1
+        producerTuning: {}
+        consumerTuning: {}
+        readinessPath: /MDTWorkspace/
+        ingressPath: /MDTWorkspace
+        earName: MDTWorkspace
+        jvm:
+          - "-Xms512m"
+          - "-Xmx512m"
+      samplepublicaccess:
+        enabled: false
+        replicaCount: 1
+        producerTuning: {}
+        consumerTuning: {}
+        readinessPath: /SamplePublicAccess/
+        ingressPath: /SamplePublicAccess
+        earName: SamplePublicAccess
+        jvm:
+          - "-Xms512m"
+          - "-Xmx512m"
+  isam:
+    enabled: false
+  mq:
+    # Set to True if running MQ in HA mode
+    useConnectionNameList: false
+    objectSuffix: ''
+    tlsSecretName: ''
+    queueManager:
+      name: "QM1"
+      secret:
+        # name is the secret that contains the 'admin' user password and the 'app' user password to use for messaging
+        name: ''
+        # appUsernameKey is the secret key that contains the username for client connections between Liberty and MQ
+        appUsernameKey: 'appUsername'
+  ingress:
+    hostname: ''
+
+# Name of an existing ServiceAccount for the application runtime
+serviceAccountName: ""
+# Name of an existing ServiceAccount for use by the hooks
+hookServiceAccountName: ""
+
+# User for performing system operations like deferred processing and login lookup.
+systemUser:
+  credsSecretName: ''
+  username: SYSTEM
+  password: "{xor}LCYsLz4sLA=="
+
+# How long to wait before commencing readiness probes
+initialDelaySeconds: 150
+
+# LTPA keys created externally
+ltpaKeys:
+  secretName: ''
+  secretKey: 'ltpa.keys'
+  passwordKey: 'passwordKey'
+
+# Liberty keystore and administrative settings
+wlpAdmin:
+  # Must have the following keys defined:
+  # - KeystorePassword: plain password for default keystore
+  # - XORKeystorePassword: "securityUtility encode $KeystorePassword"
+  # - WebSphereUsername
+  # - WebSpherePassword: plain password for $WebSphereUsername
+  # - XORWebSpherePassword: "securityUtility encode $WebSpherePassword"
+  secretName: ''
+  enableAdminCenter: false
+
+# Configure Login Module
+loginConfig:
+  trace: false
+  identityOnly: false
+
+jwtConfig:
+  issuerIdentifier: spm
+  secretName: ''
+
+# Configure Session and Transactions
+sessionConfig:
+  sessionTimeout: 30m
+  transactionTimeout: 3m
+  maxInMemorySessionCount: 1000
+  cookie:
+    httpOnly: true
+    secure: true
+
+# Liberty persistent timer settings
+persistentTimers:
+  missedPersistentTimerAction: ONCE
+  lateTimerThreshold: 5m
+  missedTaskThreshold: 120s
+  pollInterval: 120s
+  initialPollDelay: 0
+  pollSize: ""
+
+# Number of replicas to deploy
+replicaCount: 1
+
+# HTTPS port for running the application(s)
+httpsPort: 8443
+
+# Settings for node affinty, will give an affinity preference of
+#weight 100 for nodes labelled as worker-type:application
+affinityKey: worker-type
+affinityValue: application
+
+tuningDefaults:
+  # Default Executor
+  coreThreads: 4
+  maxThreads: 4
+
+  # Connection Manager JMS related params
+  maxJMSConnectionsPerThread: 2
+  mqMaxPoolSize: 12
+  mqMinPoolSize: 12
+  mqNumConnectionsPerThreadLocal: 2
+
+  # Connection Manager per DB params for fine tuning
+  curamdb_maxPoolSize: 8
+  curamdb_numConnectionsPerThreadLocal: 2
+  curamdb_purgePolicy: EntirePool
+
+  curamtimerdb_maxPoolSize: 8
+  curamtimerdb_numConnectionsPerThreadLocal: 2
+  curamtimerdb_purgePolicy: EntirePool
+
+  curamsessdb_maxPoolSize: 8
+  curamsessdb_numConnectionsPerThreadLocal: 2
+  curamsessdb_purgePolicy: EntirePool
+
+  # Data Sources for per DB data source fine tuning
+  curamdb_statementCacheSize: 1000
+  curamtimerdb_statementCacheSize: 1000
+  curamsessdb_statementCacheSize: 1000
+
+  # Endpoint tuning for queues in producer/consumer
+  maxEndPoints_DPErrorAS: 1
+  maxEndPoints_WorkflowErrorAS: 1
+  maxEndPoints_CuramDeadMessageQueueAS: 1
+
+# Default resources allocated to pods in the absence of
+# application-specific resource allocations
+defaultResources:
+  requests:
+    cpu: 0.5
+    memory: 768Mi
+  limits:
+    cpu: 0.75
+    memory: 1Gi
+
+# Pods Annotations
+podAnnotations: {}
+
+# Application properties
+properties: {}
+
+# JMX Exporter configuration (Beta Feature)
+jmxExporter:
+  enabled: false
+  port: 8080
+  configYaml: ''
