@@ -80,13 +80,11 @@ apps: {}
 #     limits:
 #       cpu: 0.75
 #       memory: 1Gi
-​
 # Override values in 'batch' Chart
 batch: {}
 #   programs:
 #     queued:
 #       schedule: "*/30 * * * *"
-​
 # Override values in 'uawebapp' Chart
 uawebapp: {}
 #   replicaCount: 1

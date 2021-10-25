@@ -85,7 +85,6 @@ batch: {}
 #   programs:
 #     queued:
 #       schedule: "*/30 * * * *"
-​
 # Override values in 'uawebapp' Chart
 uawebapp: {}
 #   replicaCount: 1
