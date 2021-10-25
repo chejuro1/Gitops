@@ -1,0 +1,144 @@
+###############################################################################
+# Copyright 2019,2021 IBM Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###############################################################################
+global:
+  # Set to 'accept' to accept the license terms of WebSphere Liberty and WebSphere MQ
+  license: ''
+  images:
+    registry: &imageRegistry minikube.local:5000
+    imageLibrary: ''
+    imagePrefix: ''
+    imageTag: latest
+  imagePullSecret:
+    secretName: ''
+    username: ''
+  pullPolicy: 'Always'
+  sch:
+    enabled: true
+  timezone: 'UTC'
+  apps:
+    config:
+      curam:
+        enabled: true
+        mqTuning: {}
+      rest:
+        enabled: false
+        mqTuning: {}
+      citizenportal:
+        enabled: false
+        mqTuning: {}
+      curamwebservices:
+        enabled: false
+        mqTuning: {}
+      curambirtviewer:
+        enabled: false
+        mqTuning: {}
+      cpmexternalns:
+        enabled: false
+        mqTuning: {}
+      cpmexternals:
+        enabled: false
+        mqTuning: {}
+      navigatorns:
+        enabled: false
+        mqTuning: {}
+      navigators:
+        enabled: false
+        mqTuning: {}
+      mdtworkspace:
+        enabled: false
+        mqTuning: {}
+      samplepublicaccess:
+        enabled: false
+        mqTuning: {}
+  mq:
+    version: 9.2.2.0-r1
+    # Licensing reference for mq.ibm.com/v1beta1
+    license: "L-APIG-BMKG5H"
+    use: "Development"
+    tlsSecretName: ''
+    queueManager:
+      name: "QM1"
+      secret:
+        # name is the secret that contains the 'admin' user password and the 'app' user password to use for messaging
+        name: ''
+        # appUsernameKey is the secret key that contains the username for client connections between Liberty and MQ
+        appUsernameKey: 'appUsername'
+        # adminPasswordKey is the secret key that contains the 'admin' user password
+        adminPasswordKey: 'adminPasswordKey'
+        # appPasswordKey is the secret key that contains the 'admin' user password
+        appPasswordKey: 'appPasswordKey'
+    security:
+      # Initialise the storage volume as root. May be required depending on the storage backend used
+      initVolumeAsRoot: false
+      # Section to specifies additional security context settings
+      context:
+        # Allow to change the ownership of that volume to be owned by the pod
+        fsGroup:
+        # May be required when using file systems
+        supplementalGroups: []
+    # availabilityType to be used for deployments via Operators only. Alternatives: MultiInstance or SingleInstance.
+    availabilityType: 'SingleInstance'
+    # storageType to be used via Operators only. Alternatives: ephemeral or persistent-claim
+    storageType: 'ephemeral'
+    # storageClassName is required when using a dynamic storage provisioner
+    storageClassName: ''
+    metrics:
+      enabled: false
+      additionalMetrics: false
+    web:
+      enabled: false
+
+# MQ Metrics image details
+metricsImage:
+  library: ''
+  name: ''
+  tag: latest
+
+# livenessProbe section specifies setting for the MQ liveness probe, which checks for a running Queue Manager
+livenessProbe:
+  # initialDelaySeconds should be raised if your system cannot start the Queue Manager in 60 seconds
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 1
+
+# readinessProbe section specifies setting for the MQ readiness probe, which checks when the MQ listener is running
+readinessProbe:
+  initialDelaySeconds: 60
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 1
+
+log:
+  format: basic
+  debug: false
+
+# Settings for node affinty, will give an affinity preference of
+# weight 100 for nodes labelled as worker-type:application
+affinityKey: worker-type
+affinityValue: application
+
+# Resource limits
+resources:
+  requests:
+    cpu: 0.5
+    memory: 0.5Gi
+  limits:
+    cpu: 1
+    memory: 1Gi
+
+# Pods Annotations
+podAnnotations: {}
