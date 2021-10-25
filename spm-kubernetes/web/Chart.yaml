@@ -1,0 +1,4 @@
+apiVersion: v2
+version: 0.0.2
+name: web
+description: Chart to configure ArgoCD with the reactui-sample project and its applications
