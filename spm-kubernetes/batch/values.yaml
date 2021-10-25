@@ -80,7 +80,6 @@ apps: {}
 #     limits:
 #       cpu: 0.75
 #       memory: 1Gi
-​
 # Override values in 'batch' Chart
 batch: {}
 #   programs:
