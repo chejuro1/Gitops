@@ -1,0 +1,543 @@
+{{- include "sch.config.init" (list . "apps.sch.chart.config.values") -}}
+{{- $dbHostname := .Values.global.database.hostname -}}
+{{- range $name, $app := .Values.global.apps.config }}
+{{- if $app.enabled }}
+{{- $imageData := dict "ImageConfig" $.Values.global.images "ImageName" $name }}
+{{- $qmgrName := printf "%s_%s" (trunc 5 $.Values.global.mq.objectSuffix) (trunc -10 $name) }}
+{{- $tuningParams := $app.producerTuning }}
+
+---
+###############################################################################
+# Copyright 2019,2021 IBM Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###############################################################################
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sch.names.fullCompName" (list $ (printf "%s-producer" $name)) }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "sch.metadata.labels.standard" (list $ (printf "%s-producer" $name)) | nindent 4 }}
+spec:
+  replicas: {{ default $.Values.replicaCount (default $app.replicaCount $tuningParams.replicaCount) }}
+  selector:
+    matchLabels:
+     {{- include "sch.metadata.labels.standard" (list $ (printf "%s-producer" $name) ) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sch.metadata.labels.standard" (list $ (printf "%s-producer" $name)) | nindent 8 }}
+        app: {{ $name }}-producer
+        version: v{{ $.Release.Revision }}
+      annotations:
+        {{- include "sch.metadata.annotations.metering" (list $ $.sch.chart.metering) | nindent 8 }}
+        {{- with $.Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "sch.security.securityContext" (list $ $.sch.chart.podSecurityContext) | nindent 6 }}
+      affinity:
+        {{- include "sch.affinity.nodeAffinity" (list $ $.sch.chart.nodeAffinity) | nindent 8 }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                  - {{ (printf "%s-producer" $name) }}
+              topologyKey: topology.kubernetes.io/zone
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                  - {{ (printf "%s-producer" $name) }}
+              topologyKey: kubernetes.io/hostname
+      {{- if or $.Values.global.imagePullSecret.secretName $.Values.global.imagePullSecret.username }}
+      imagePullSecrets:
+        - name: {{ default (printf "%s-pull-secret" $.Release.Name) $.Values.global.imagePullSecret.secretName }}
+      {{- end }}
+      restartPolicy: {{ $app.restartPolicy | default "Always" }}
+      serviceAccountName: {{ default (include "sch.names.fullName" (list $)) $.Values.serviceAccountName }}
+      volumes:
+        - name: server-cm
+          configMap:
+            name: {{ $.Release.Name }}-server-cm
+        - name: jvm-override
+          configMap:
+            name: {{ $.Release.Name }}-jvm-override-{{ $name }}
+        - name: jvm-options-cm
+          configMap:
+            name: {{ $.Release.Name }}-jvm-options-cm
+        - name: messaging-config
+          configMap:
+            name: {{ $.Release.Name }}-messaging-config
+        - name: applications-cm
+          configMap:
+            name: {{ $.Release.Name }}-applications-cm
+        - name: ejb-bindings
+          configMap:
+            name: {{ $.Release.Name }}-jms-producer-bind
+        - name: dbconn-cm
+          configMap:
+            name: {{ $.Release.Name }}-dbconn-cm
+        - name: log4j-cm
+          configMap:
+            name: {{ $.Release.Name }}-log4j-cm
+        - name: endpoints-cm
+          configMap:
+            name: {{ $.Release.Name }}-endpoints-cm
+        - name: logging-cm
+          configMap:
+            name: {{ $.Release.Name }}-logging-cm
+        - name: openid-cm
+          configMap:
+            name: {{ $.Release.Name }}-openid-cm
+        - name: transactions-cm
+          configMap:
+            name: {{ $.Release.Name }}-transactions-cm
+        - name: sessions-cm
+          configMap:
+            name: {{ $.Release.Name }}-sessions-cm
+        - name: security-cm
+          configMap:
+            name: {{ $.Release.Name }}-jms-producer-security
+        - name: ltpa-secret
+          secret:
+            secretName: {{ default (printf "%s-ltpa-keys" $.Release.Name) $.Values.ltpaKeys.secretName }}
+        {{- if eq $name "curambirtviewer" }}
+        - name: birt-bind
+          configMap:
+            name: {{ $.Release.Name }}-birt-bind
+        {{- end }}
+        {{- if $.Values.global.isam.enabled }}
+        - name: isam-cm
+          configMap:
+            name: {{ $.Release.Name }}-isam-cm
+        - name: federated-metadata-cm
+          configMap:
+            name: {{ $.Release.Name }}-federated-metadata-cm
+        {{- end }}
+        {{- if and $.Values.global.useBetaFeatures $.Values.jmxExporter.enabled }}
+        - name: jmx-exporter-config
+          configMap:
+            name: {{ $.Release.Name }}-jmx-exporter-config
+        {{- end }}
+        - name: keystore-volume
+          emptyDir: {}
+        - name: env-volume
+          emptyDir: {}
+        - name: service-certs
+          secret:
+            {{- if $.Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+            secretName: {{ include "sch.names.fullCompName" (list $ $name) }}
+            {{- else }}
+            secretName: {{ $.Release.Name }}-apps-tls
+            {{- end }}
+        - name: jwt-certs
+          secret:
+            secretName: {{ default (printf "%s-apps-jwt" $.Release.Name) $.Values.jwtConfig.secretName }}
+        - name: xmlserver-certs
+          secret:
+            secretName: {{ $.Release.Name }}-xmlserver
+        {{- if and (eq ($.Values.global.database.type | upper) "DB2") $.Values.global.database.ssl.enabled $.Values.global.database.ssl.secretName }}
+        - name: db2-cert
+          secret:
+            secretName: {{ $.Values.global.database.ssl.secretName }}
+        {{- end }}
+        - name: mq-certs
+          secret:
+            {{- if $.Values.global.mq.useConnectionNameList }}
+            secretName: {{ required "Name of secret containing IBM MQ certificates not provided! (global.mq.tlsSecretName)" $.Values.global.mq.tlsSecretName }}
+            {{- else }}
+            secretName: {{ $.Values.global.mq.tlsSecretName | default (printf "%s-mq-secret" $.Release.Name) }}
+            {{- end }}
+        {{- if $.Values.global.apps.common.persistence.enabled }}
+        - name: {{ $.Release.Name }}-persistence-volume
+          persistentVolumeClaim:
+            claimName: {{ $.Release.Name }}-persistence-pvc
+        {{- end }}
+      initContainers:
+        {{- if not (hasKey $app "mqConnectionNameList") }}
+        - name: wait-for-mq
+          {{- include "utilities.definition" $ | indent 10 }}
+          command:
+            - /bin/sh
+            - -c
+            {{- if ($.Capabilities.APIVersions.Has "mq.ibm.com/v1beta1") }}
+            - >
+              until nc -z -w3 {{ $.Release.Name }}-mqserver-{{ $name }}-ibm-mq 1414; do
+                echo waiting for {{ $.Release.Name }}-mqserver-{{ $name }}-ibm-mq:1414 to be reachable;
+                sleep 2;
+              done;
+            {{- else }}
+            - >
+              until nc -z -w3 {{ $.Release.Name }}-mqserver-{{ $name }} 1414; do
+                echo waiting for {{ $.Release.Name }}-mqserver-{{ $name }}:1414 to be reachable;
+                sleep 2;
+              done;
+            {{- end }}
+        {{- end }}
+        {{- if and (eq ($.Values.global.database.type | upper) "DB2") $.Values.global.database.ssl.enabled $.Values.global.database.ssl.secretName }}
+        - name: import-db2-cert
+          {{- include "utilities.definition" $ | indent 10 }}
+          env:
+            - name: certfile
+              value: /mnt/certificates/{{ $.Values.global.database.ssl.secretKey }}
+            - name: keystore_jks
+              value: /mnt/keystores/db2TrustStore.jks
+          command:
+            - /bin/sh
+            - -c
+            - keytool -import -trustcacerts -noprompt -file $certfile -keystore $keystore_jks -storepass changeit -storetype jks
+          volumeMounts:
+            - name: keystore-volume
+              mountPath: /mnt/keystores
+            - name: db2-cert
+              mountPath: /mnt/certificates
+        {{- end }}
+        - name: import-tls-certs
+          {{- include "utilities.definition" $ | indent 10 }}
+          env:
+            - name: svcKeyFile
+              value: /mnt/svcCertificates/tls.key
+            - name: svcCrtFile
+              value: /mnt/svcCertificates/tls.crt
+            - name: keystore
+              value: /mnt/keystores/key.p12
+            - name: password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-wlpadm" $.Release.Name) $.Values.wlpAdmin.secretName }}
+                  key: KeystorePassword
+          command:
+            - /bin/sh
+            - -c
+            - >
+              openssl pkcs12 -export -inkey $svcKeyFile -in $svcCrtFile -out $keystore -password pass:$password -name default;
+              keytool -list -v -keystore $keystore -storepass $password -storetype pkcs12;
+          volumeMounts:
+            - name: keystore-volume
+              mountPath: /mnt/keystores
+            - name: service-certs
+              mountPath: /mnt/svcCertificates
+        - name: import-jwt-certs
+          {{- include "utilities.definition" $ | indent 10 }}
+          env:
+            - name: svcKeyFile
+              value: /mnt/svcCertificates/tls.key
+            - name: svcCrtFile
+              value: /mnt/svcCertificates/tls.crt
+            - name: keystore
+              value: /mnt/keystores/jwtkeystore.p12
+            - name: truststore
+              value: /mnt/keystores/key.p12
+            - name: password
+              value: password
+            - name: trustpassword
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-wlpadm" $.Release.Name) $.Values.wlpAdmin.secretName }}
+                  key: KeystorePassword
+          command:
+            - /bin/sh
+            - -c
+            - >
+              openssl pkcs12 -export -inkey $svcKeyFile -in $svcCrtFile -out $keystore -password pass:$password -name jwtkeyalias;
+              keytool -import -trustcacerts -noprompt -alias jwtcertalias -file $svcCrtFile -keystore $truststore -storepass $trustpassword -storetype pkcs12;
+              keytool -list -v -keystore $keystore -storepass $password -storetype pkcs12;
+              keytool -list -v -keystore $truststore -storepass $trustpassword -storetype pkcs12;
+          volumeMounts:
+            - name: keystore-volume
+              mountPath: /mnt/keystores
+            - name: jwt-certs
+              mountPath: /mnt/svcCertificates
+        - name: import-certs-for-mq
+          {{- include "utilities.definition" $ | indent 10 }}
+          env:
+            - name: mqCrtDir
+              value: /mnt/mqCertificates
+            - name: truststore
+              value: /mnt/keystores/key.p12
+            - name: password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-wlpadm" $.Release.Name) $.Values.wlpAdmin.secretName }}
+                  key: KeystorePassword
+          command:
+            - /bin/sh
+            - -c
+            - >
+              {{- if $.Values.global.mq.useConnectionNameList }}
+              keytool -import -trustcacerts -noprompt -alias {{ $qmgrName | lower }} -file $mqCrtDir/key_{{ $qmgrName }}.arm -keystore $truststore -storepass $password -storetype pkcs12;
+              {{- else }}
+              keytool -import -trustcacerts -noprompt -alias ibmwebspheremq{{ $.Values.global.mq.queueManager.name | lower }} -file $mqCrtDir/tls.crt -keystore $truststore -storepass $password -storetype pkcs12;
+              {{- end }}
+              keytool -list -v -keystore $truststore -storepass $password -storetype pkcs12;
+          volumeMounts:
+            - name: keystore-volume
+              mountPath: /mnt/keystores
+            - name: mq-certs
+              mountPath: /mnt/mqCertificates
+        - name: import-certs-for-xmlserver
+          {{- include "utilities.definition" $ | indent 10 }}
+          env:
+            - name: xmlServerCrtDir
+              value: /mnt/xmlServerCertificates
+            - name: truststore
+              value: /mnt/keystores/key.p12
+            - name: password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-wlpadm" $.Release.Name) $.Values.wlpAdmin.secretName }}
+                  key: KeystorePassword
+          command:
+            - /bin/sh
+            - -c
+            - >
+              keytool -import -trustcacerts -noprompt -alias xmlserverks -file $xmlServerCrtDir/tls.crt -keystore $truststore -storepass $password -storetype pkcs12;
+              keytool -list -v -keystore $truststore -storepass $password -storetype pkcs12;
+          volumeMounts:
+            - name: keystore-volume
+              mountPath: /mnt/keystores
+            - name: xmlserver-certs
+              mountPath: /mnt/xmlServerCertificates
+        - name: populate-jvm-options
+          {{- include "utilities.definition" $ | indent 10 }}
+          command:
+            - /bin/sh
+            - -c
+            - >
+              {{- range (default $app.jvm $tuningParams.jvm) }}
+              echo "{{ . }}" >> /mnt/envvol/jvm.options;
+              {{- end }}
+          volumeMounts:
+            - name: env-volume
+              mountPath: /mnt/envvol
+      containers:
+        - name: {{ $.Chart.Name }}-producer-{{ $name }}
+          image: {{ include "apps.imageFullName" $imageData }}
+          imagePullPolicy: {{ $.Values.global.images.pullPolicy }}
+          {{- include "sch.security.securityContext" (list . $.sch.chart.containerSecurityContext) | indent 10 }}
+          ports:
+            - name: client
+              containerPort: {{ $.Values.httpsPort }}
+              {{- if and $.Values.global.useBetaFeatures $.Values.jmxExporter.enabled }}
+            - name: jmxmetrics
+              containerPort: {{ $.Values.jmxExporter.port }}
+              {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ default (printf "%s-db-credentials" $.Release.Name) $.Values.global.database.credsSecretName }}
+            - secretRef:
+                name: {{ default (printf "%s-system-credentials" $.Release.Name) $.Values.systemUser.credsSecretName }}
+            - secretRef:
+                name: {{ default (printf "%s-wlpadm" $.Release.Name) $.Values.wlpAdmin.secretName }}
+            - configMapRef:
+                name: {{ $.Release.Name }}-tuning-producer-{{ $name }}
+          env:
+            - name: LICENSE
+              value: {{ $.Values.global.license }}
+            - name: EAR_NAME
+              value: {{ required "earName not specified!" $app.earName }}
+            - name: WAR_NAME
+              value: {{ $app.warName | default "ClientModule" }}
+            - name: SESSION_COOKIE_NAME
+              {{- if eq $name "curambirtviewer" }}
+              value: BIRTJSESSIONID
+              {{- else }}
+              value: JSESSIONID
+              {{- end }}
+            - name: LOG_DIR
+              value: {{ include "apps.logsDir" $ }}
+            - name: LTPA_KEYS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-ltpa-keys" $.Release.Name) $.Values.ltpaKeys.secretName }}
+                  key: {{ $.Values.ltpaKeys.passwordKey }}
+            {{- if $.Values.global.mq.useConnectionNameList }}
+            - name: MQ_CONN_NAME_LIST
+              value: {{ $app.mqConnectionNameList }}
+            - name: MQ_QMGR_NAME
+              value: {{ $qmgrName }}
+            - name: MQ_CHANNEL_NAME
+              value: CHL_{{ $qmgrName | upper }}
+            {{- else }}
+            - name: MQ_HOST_NAME
+            {{- if ($.Capabilities.APIVersions.Has "mq.ibm.com/v1beta1") }}
+              value: {{ $.Release.Name }}-mqserver-{{ $name }}-ibm-mq
+            {{- else }}
+              value: {{ $.Release.Name }}-mqserver-{{ $name }}
+            {{- end }}
+            - name: MQ_QMGR_NAME
+              value: {{ $.Values.global.mq.queueManager.name }}
+            - name: MQ_CHANNEL_NAME
+              value: MQ_CHN_PROD
+            - name: MQ_CHANNEL_PORT
+              value: "1414"
+            {{- end }}
+            - name: MQ_CONN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-mq-credentials" $.Release.Name) $.Values.global.mq.queueManager.secret.name }}
+                  key: {{ $.Values.global.mq.queueManager.secret.appUsernameKey }}
+            {{- if $.Values.global.apps.common.persistence.enabled }}
+            - name: MOUNT_POINT
+              value: {{ include "persistence.mountPoint" $ }}
+            {{- end }}
+            - name: TZ
+              value: {{ $.Values.global.timezone }}
+            - name: POD_TIMER_TYPE
+              value: {{ $.Chart.Name }}_producer_{{ $name }}
+          {{- with .readinessPath }}
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - /opt/ibm/helpers/runtime/readiness-probe.sh {{ include "apps.logsDir" $ }}/messages*.log {{ $.Values.global.ingress.hostname }}{{ . }}
+            initialDelaySeconds: {{ $.Values.initialDelaySeconds }}
+            periodSeconds: 10
+            timeoutSeconds: 2
+          {{- end }}
+          {{- if .readinessTCPProbe }}
+          readinessProbe:
+            tcpSocket:
+              port: client
+            initialDelaySeconds: 90
+            periodSeconds: 10
+          {{- end }}
+          {{- if .readinessString }}
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - /bin/grep {{ .readinessString | quote }} {{ include "apps.logsDir" $ }}/messages*.log
+            initialDelaySeconds: 90
+            periodSeconds: 10
+          {{- end }}
+          startupProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - /bin/grep -e "application available .*{{ $app.ingressPath }}" {{ include "apps.logsDir" $ }}/messages.log
+            initialDelaySeconds: {{ $.Values.initialDelaySeconds }}
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - /opt/ibm/helpers/runtime/liveness-probe.sh {{ include "apps.logsDir" $ }}/messages.log
+            initialDelaySeconds: {{ $.Values.initialDelaySeconds }}
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            {{- if $tuningParams.resources }}
+            {{- toYaml ($tuningParams.resources) | nindent 12 }}
+            {{- else }}
+            {{- toYaml (default $.Values.defaultResources $app.resources) | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: server-cm
+              mountPath: /config/server.xml
+              subPath: server.xml
+            - name: jvm-override
+              mountPath: /config/configDropins/overrides/jvm.options
+              subPath: jvm.options
+            - name: jvm-options-cm
+              mountPath: /config/configDropins/defaults/jvm.options
+              subPath: jvm.options
+            - name: messaging-config
+              mountPath: /config/adc_conf/server_resources_messaging.xml
+              subPath: server_resources_messaging.xml
+            - name: applications-cm
+              mountPath: /config/adc_conf/server_applications.xml
+              subPath: server_applications.xml
+            - name: ejb-bindings
+              mountPath: /config/configDropins/defaults/application_CuramServerCode.xml
+              subPath: application_CuramServerCode.xml
+            {{- if eq $name "curambirtviewer" }}
+            - name: birt-bind
+              mountPath: /config/configDropins/defaults/application_CuramBIRTViewer.xml
+              subPath: application_CuramBIRTViewer.xml
+            {{- else }}
+            - name: ejb-bindings
+              mountPath: /config/configDropins/defaults/application_ClientCode.xml
+              subPath: application_ClientCode.xml
+            {{- end }}
+            - name: dbconn-cm
+              mountPath: /config/adc_conf/server_resources_jdbc.xml
+              subPath: server_resources_jdbc.xml
+            - name: log4j-cm
+              mountPath: /opt/log4j
+            - name: endpoints-cm
+              mountPath: /config/adc_conf/server_endpoints.xml
+              subPath: server_endpoints.xml
+            - name: logging-cm
+              mountPath: /config/adc_conf/server_logging.xml
+              subPath: server_logging.xml
+            - name: openid-cm
+              mountPath: /config/configDropins/defaults/server_openid.xml
+              subPath: server_openid.xml
+            - name: openid-cm
+              mountPath: /config/resources/JWTKeystore.properties
+              subPath: JWTKeystore.properties
+            - name: transactions-cm
+              mountPath: /config/adc_conf/server_resources_tx.xml
+              subPath: server_resources_tx.xml
+            - name: sessions-cm
+              mountPath: /config/adc_conf/sessions_management.xml
+              subPath: sessions_management.xml
+            - name: security-cm
+              mountPath: /config/adc_conf/server_security.xml
+              subPath: server_security.xml
+            - name: ltpa-secret
+              mountPath: /opt/ibm/wlp/output/defaultServer/resources/security/ltpa.keys
+              subPath: ltpa.keys
+            {{- if $.Values.global.isam.enabled }}
+            - name: isam-cm
+              mountPath: /config/configDropins/overrides/server_isam.xml
+              subPath: server_isam.xml
+            - name: federated-metadata-cm
+              mountPath: /output/resources/security/federation_metadata.xml
+              subPath: federation_metadata.xml
+            {{- end }}
+            {{- if and $.Values.global.useBetaFeatures $.Values.jmxExporter.enabled }}
+            - name: jmx-exporter-config
+              mountPath: /config/configDropins/overrides/config.yaml
+              subPath: config.yaml
+            {{- end }}
+            - name: keystore-volume
+              mountPath: /output/resources/security
+            - name: keystore-volume
+              mountPath: /config/resources/jwtkeystore.p12
+              subPath: jwtkeystore.p12
+            {{- if $.Values.global.apps.common.persistence.enabled }}
+            - name: {{ $.Release.Name }}-persistence-volume
+              mountPath: {{ include "persistence.mountPoint" $ }}
+            {{- end }}
+            - name: env-volume
+              mountPath: /config/jvm.options
+              subPath: jvm.options
+{{- end }}
+{{- end }}
