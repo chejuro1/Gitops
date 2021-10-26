@@ -1,0 +1,33 @@
+global: {}
+argocd-config:
+  repoUrl: "http://gogs.tools:3000/toolkit/gitops.git"
+  project: "openshift-gitops"
+  applicationTargets:
+  - targetRevision: master
+    createNamespace: true
+    targetNamespace: "spm-test1"
+    applications:
+     - name: "apps"
+       path: "spm-argocd/spm/apps"
+       type: helm
+       chart: apps
+     - name: "batch"
+       path: "pm-argocd/spm/batch"
+       type: helm
+       chart: batch
+     - name: "mqserver"
+       path: "pm-argocd/spm/mqserver"
+       type: helm
+       chart: mqserver
+     - name: "spm"
+       path: "spm-kubernetes/spm"
+       type: helm
+       chart: spm
+     - name: "web"
+       path: "pm-argocd/spm/web"
+       type: helm
+       chart: web
+     - name: "xmlserver"
+       path: "pm-argocd/spm/xmlserver"
+       type: helm
+       chart: xmlserver
