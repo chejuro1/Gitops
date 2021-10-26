@@ -65,7 +65,7 @@ global:
   #     curambirtviewer:
   #       enabled: false
 # Override values in 'apps' Chart
-apps: {}
+apps: 
 #   replicaCount: 1
 #   initialDelaySeconds: 60
 #   loginConfig:
@@ -73,12 +73,12 @@ apps: {}
 #   sessionConfig:
 #     sessionTimeout: 30m
 #     transactionTimeout: 3m
-#   defaultResources:
-#     requests:
-#       cpu: 0.5
-#       memory: 768Mi
-#     limits:
-#       cpu: 0.75
+    defaultResources:
+      requests:
+        cpu: 0.25
+        # memory: 768Mi
+      limits:
+       cpu: 0.5
 #       memory: 1Gi
 # Override values in 'batch' Chart
 batch: {}
