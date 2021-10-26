@@ -1,0 +1,157 @@
+{{- include "sch.config.init" (list . "mqserver.sch.chart.config.values") -}}
+{{- if (not (.Capabilities.APIVersions.Has "mq.ibm.com/v1beta1")) }}
+{{ $apps := .Values.global.apps.config }}
+{{- range $name, $app := $apps }}
+{{- if and ($app.enabled) (not (hasKey $app "mqConnectionNameList")) }}
+{{- $tuningParams := $app.mqTuning }}
+---
+###############################################################################
+# Copyright 2019,2021 IBM Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###############################################################################
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sch.names.fullCompName" (list $ $name) }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "sch.metadata.labels.standard" (list $ $name) | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "sch.metadata.labels.standard" (list $ $name) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sch.metadata.labels.standard" (list $ $name) | nindent 8 }}
+        app: {{ $name }}-{{ include "sch.names.appName" (list $) }}
+        version: v{{ $.Release.Revision }}
+      annotations:
+        {{- include "sch.metadata.annotations.metering" (list $ $.sch.chart.metering) | nindent 8 }}
+        {{- with $.Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- include "sch.security.securityContext" (list $ $.sch.chart.podSecurityContext) | nindent 6 }}
+      affinity:
+        {{- include "sch.affinity.nodeAffinity" (list $ $.sch.chart.nodeAffinity) | nindent 8 }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                  - mqserver
+              topologyKey: topology.kubernetes.io/zone
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                  - mqserver
+              topologyKey: kubernetes.io/hostname
+      restartPolicy: {{ .restartPolicy | default "Always" }}
+      volumes:
+        - name: mqsc-cmds
+          configMap:
+            name: {{ include "sch.names.fullCompName" (list $ "cm") }}
+        - name: service-certs
+          secret:
+            secretName: {{ $.Values.global.mq.tlsSecretName | default (printf "%s-mq-secret" $.Release.Name) }}
+      containers:
+        - name: {{ $.Chart.Name }}-{{ $name }}
+          image: ibmcom/mq:{{ $.Values.global.mq.version }}
+          imagePullPolicy: {{ $.Values.global.pullPolicy }}
+          env:
+            - name: LICENSE
+              value: {{ $.Values.global.license }}
+            - name: MQ_QMGR_NAME
+              value: {{ $.Values.global.mq.queueManager.name }}
+            - name: LOG_FORMAT
+              value: {{ $.Values.log.format | default "basic" }}
+            - name: MQ_ENABLE_METRICS
+              value: {{ $.Values.global.mq.metrics.enabled | default false | quote }}
+            - name: DEBUG
+              value: {{ $.Values.log.debug | default false | quote }}
+            - name: MQ_EPHEMERAL_PREFIX
+              value: /run/mqm
+            - name: MQ_DEV
+              value: "false"
+            - name: MQ_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-mq-credentials" $.Release.Name) $.Values.global.mq.queueManager.secret.name }}
+                  key: {{ $.Values.global.mq.queueManager.secret.adminPasswordKey }}
+            - name: MQ_APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-mq-credentials" $.Release.Name) $.Values.global.mq.queueManager.secret.name }}
+                  key: {{ $.Values.global.mq.queueManager.secret.appPasswordKey }}
+            - name: TZ
+              value: {{ $.Values.global.timezone }}
+          ports:
+            - containerPort: 1414
+            - containerPort: 9443
+            - containerPort: 9157
+          # Set liveness probe to determine if the queue manager is running
+          livenessProbe:
+            exec:
+              command:
+              - chkmqhealthy
+            initialDelaySeconds: {{ $.Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ $.Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ $.Values.livenessProbe.failureThreshold }}
+          # Set readiness probe to determine if the MQ listener is running
+          readinessProbe:
+            exec:
+              command:
+              - chkmqready
+            initialDelaySeconds: {{ $.Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ $.Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ $.Values.readinessProbe.failureThreshold }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            privileged: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            {{- if $tuningParams.resources }}
+            {{- toYaml ($tuningParams.resources) | nindent 12 }}
+            {{- else }}
+            {{- toYaml ($.Values.resources) | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: mqsc-cmds
+              mountPath: /etc/mqm/20-config.mqsc
+              subPath: config.mqsc
+            - name: mqsc-cmds
+              mountPath: /etc/mqm/30-channel.mqsc
+              subPath: channel_{{$name}}.mqsc
+            - name: service-certs
+              mountPath: /etc/mqm/pki/keys/ibmwebspheremq{{ $.Values.global.mq.queueManager.name | default "QM1" | lower }}
+              readOnly: true
+{{- end }}
+{{- end }}
+{{- end }}
