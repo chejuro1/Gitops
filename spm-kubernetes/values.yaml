@@ -4,7 +4,7 @@ argocd-config:
   project: "openshift-gitops"
   applicationTargets:
   - targetRevision: master
-    createNamespace: true
+    createNamespace: false
     targetNamespace: "spm-curam-test"
     applications:
      - name: "apps"
