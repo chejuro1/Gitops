@@ -1,5 +1,0 @@
-dependencies:
-  - name: spm
-    version: 21.9.3
-    repository: >-
-      http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
