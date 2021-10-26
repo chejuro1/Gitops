@@ -65,7 +65,7 @@ global:
   #     curambirtviewer:
   #       enabled: false
 # Override values in 'apps' Chart
-apps: 
+apps: {}
 #   replicaCount: 1
 #   initialDelaySeconds: 60
 #   loginConfig:
