@@ -5,7 +5,7 @@ argocd-config:
   applicationTargets:
   - targetRevision: master
     createNamespace: true
-    targetNamespace: "spm-test"
+    targetNamespace: "spm-curam-test"
     applications:
      - name: "apps"
        path: "spm-kubernetes/apps"
