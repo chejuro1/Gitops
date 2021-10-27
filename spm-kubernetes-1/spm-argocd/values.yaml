@@ -10,24 +10,18 @@ argocd-config:
      - name: "apps"
        path: "spm-argocd/spm/apps"
        type: helm
-       chart: apps
      - name: "batch"
-       path: "pm-argocd/spm/batch"
+       path: "spm-argocd/spm/batch"
        type: helm
-       chart: batch
-     - name: "mqserver"
-       path: "pm-argocd/spm/mqserver"
+     - name: "smqserver"
+       path: "spm-argocd/spm/mqserver"
        type: helm
-       chart: mqserver
      - name: "spm"
-       path: "spm-kubernetes/spm"
+       path: "spm-argocd/spm/spm"
        type: helm
-       chart: spm
      - name: "web"
-       path: "pm-argocd/spm/web"
+       path: "spm-argocd/spm/web"
        type: helm
-       chart: web
      - name: "xmlserver"
-       path: "pm-argocd/spm/xmlserver"
+       path: "spm-argocd/spm/xmlserver"
        type: helm
-       chart: xmlserver
