@@ -7,24 +7,21 @@ argocd-config:
     createNamespace: false
     targetNamespace: "curam"
     applications:
-    - name: "spm"
-      path: "spm-argocd/spm"
-      type: helm
-    #  - name: "apps"
-    #    path: "spm-argocd/spm/apps"
-    #    type: helm
-    #  - name: "batch"
-    #    path: "spm-argocd/spm/batch"
-    #    type: helm
-    #  - name: "smqserver"
-    #    path: "spm-argocd/spm/mqserver"
-    #    type: helm
-    #  - name: "spm"
-    #    path: "spm-argocd/spm/spm"
-    #    type: helm
-    #  - name: "web"
-    #    path: "spm-argocd/spm/web"
-    #    type: helm
-    #  - name: "xmlserver"
-    #    path: "spm-argocd/spm/xmlserver"
-    #    type: helm
+     - name: "apps"
+       path: "spm-kubernetes-1/spm-argocd/spm/apps"
+       type: helm
+     - name: "batch"
+       path: "spm-kubernetes-1/spm-argocd/spm/batch"
+       type: helm
+     - name: "smqserver"
+       path: "spm-kubernetes-1/spm-argocd/spm/mqserver"
+       type: helm
+     - name: "spm"
+       path: "spm-argocd/spm/spm"
+       type: helm
+     - name: "web"
+       path: "spm-kubernetes-1/spm-argocd/spm/web"
+       type: helm
+     - name: "xmlserver"
+       path: "spm-kubernetes-1/spm-argocd/spm/xmlserver"
+       type: helm
