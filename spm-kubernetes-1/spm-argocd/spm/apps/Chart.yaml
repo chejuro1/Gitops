@@ -4,6 +4,6 @@ name: apps
 description: Chart to configure ArgoCD with the reactui-sample project and its applications
 dependencies:
   - name: apps
-    version: 21.9.1
+    version: 21.8.0
     repository: >-
       http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
