@@ -1,0 +1,5 @@
+dependencies:
+  - name: reactui-sample
+    version: 0.0.2
+    repository: >-
+      http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project

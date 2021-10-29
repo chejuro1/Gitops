@@ -1,0 +1,3 @@
+global: {}
+reactui-sample:
+  replicaCount: 1
