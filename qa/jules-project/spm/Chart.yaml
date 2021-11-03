@@ -1,0 +1,4 @@
+apiVersion: v2
+version: 0.1.0
+name: spm
+description: Chart to configure ArgoCD with the spm project and its applications
