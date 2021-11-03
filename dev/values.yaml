@@ -1,7 +1,7 @@
 global: {}
 argocd-config:
   repoUrl: "http://gogs.tools:3000/toolkit/gitops.git"
-  project: spm-dev
+  project: "openshift-gitops"
   applicationTargets:
     - targetRevision: master
       createNamespace: false
