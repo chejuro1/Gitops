@@ -1,0 +1,4 @@
+apiVersion: v2
+version: 0.1.0
+name: httpserver
+description: Chart to configure ArgoCD with the httpserver project and its applications
