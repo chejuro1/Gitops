@@ -97,7 +97,7 @@ uawebapp: {}
 #   ingressPath: /universal
 # Override values in 'web' Chart
 web: {}
-#   replicaCount: 1
+   replicaCount: 2
 #   readinessProbe:
 #     path: /CuramStatic/
 #   ingressPath: /CuramStatic
