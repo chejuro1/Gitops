@@ -102,8 +102,8 @@ web: {}
 #     path: /CuramStatic/
 #   ingressPath: /CuramStatic
 # Override values in 'xmlserver' Chart
-xmlserver: {}
-#   replicaCount: 1
+xmlserver: 
+    replicaCount: 2
 #   jvm:
 #      maxMemory: '-Djava.maxmemory=768m'
 #      threadStackSize: '-Djava.thread.stack.size=-Xss4m'
