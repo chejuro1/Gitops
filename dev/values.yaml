@@ -5,7 +5,7 @@ argocd-config:
   applicationTargets:
     - targetRevision: master
       createNamespace: false
-      targetNamespace: jules-project
+      targetNamespace: curam-test
       applications:
         - name: spm
           path: dev/spm
