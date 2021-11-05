@@ -7,25 +7,25 @@ dependencies:
     version: 21.8.0
     repository: >-
       http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
-  - name: apps
-    version: 21.8.0
-    repository: >-
-      http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
-  - name: web
-    version: 21.8.0
-    repository: >-
-      http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
-  - name: mqserver
-    version: 21.8.0
-    repository: >-
-      http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
-  - name: batch
-    version: 21.8.0
-    repository: >-
-      http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
-  - name: xmlserver
-    version: 21.8.0
-    repository: >-
-      http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
+  # - name: apps
+  #   version: 21.8.0
+  #   repository: >-
+  #     http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
+  # - name: web
+  #   version: 21.8.0
+  #   repository: >-
+  #     http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
+  # - name: mqserver
+  #   version: 21.8.0
+  #   repository: >-
+  #     http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
+  # - name: batch
+  #   version: 21.8.0
+  #   repository: >-
+  #     http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
+  # - name: xmlserver
+  #   version: 21.8.0
+  #   repository: >-
+  #     http://artifactory-artifactory.tools:8082/artifactory/generic-local/local-development
   
  
