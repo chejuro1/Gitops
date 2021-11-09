@@ -7,25 +7,23 @@ dependencies:
     version: 21.8.0
     repository: >-
       http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
-  # - name: apps
-  #   version: 21.8.0
-  #   repository: >-
-  #     http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
-  # - name: web
-  #   version: 21.8.0
-  #   repository: >-
-  #     http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
-  # - name: mqserver
-  #   version: 21.8.0
-  #   repository: >-
-  #     http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
-  # - name: batch
-  #   version: 21.8.0
-  #   repository: >-
-  #     http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
-   - name: xmlserver
-     version: 21.8.0
-     repository: >-
-       http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
-  
- 
+  - name: apps
+    version: 21.8.0
+    repository: >-
+      http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
+  - name: web
+    version: 21.8.0
+    repository: >-
+      http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
+  - name: mqserver
+    version: 21.8.0
+    repository: >-
+      http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
+  - name: batch
+    version: 21.8.0
+    repository: >-
+      http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
+  - name: xmlserver
+    version: 21.8.0
+    repository: >-
+      http://artifactory-artifactory.tools:8082/artifactory/generic-local/curam-development
