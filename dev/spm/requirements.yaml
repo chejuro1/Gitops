@@ -1,19 +1,19 @@
-dependencies:
-  - name: spm
-    version: 0.0.20
-    repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
-  - name: apps
-    version: 0.0.20
-    repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
-  - name: batch
-    version: 0.0.20
-    repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
-  - name: mqserver
-    version: 0.0.20
-    repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
-  - name: web
-    version: 0.0.20
-    repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
-  - name: xmlserver
-    version: 0.0.20
-    repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
+# dependencies:
+#   - name: spm
+#     version: 0.0.20
+#     repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
+#   - name: apps
+#     version: 0.0.20
+#     repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
+#   - name: batch
+#     version: 0.0.20
+#     repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
+#   - name: mqserver
+#     version: 0.0.20
+#     repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
+#   - name: web
+#     version: 0.0.20
+#     repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
+#   - name: xmlserver
+#     version: 0.0.20
+#     repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
