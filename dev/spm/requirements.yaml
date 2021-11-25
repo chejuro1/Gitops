@@ -1,6 +1,6 @@
 dependencies:
   - name: spm
-    version: 0.0.19
+    version: 0.0.20
     repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
   - name: apps
     version: 0.0.19
@@ -17,7 +17,3 @@ dependencies:
   - name: xmlserver
     version: 0.0.19
     repository: http://artifactory-artifactory.tools:8082/artifactory/generic-local/jules-project
-
-
-
-
