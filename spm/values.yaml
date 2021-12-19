@@ -10,7 +10,7 @@ global:
   images:
 #    registry: &imageRegistry default-route-openshift-image-registry.apps.ocp4aws1.aws.chspm.net
     registry: &imageRegistry image-registry.openshift-image-registry.svc:5000  
-    imageLibrary: 'ocp'
+    imageLibrary: 'jules-project'
     imagePrefix: ''
     imageTag: 0.0.1
     pullPolicy: Always
