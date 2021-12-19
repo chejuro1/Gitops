@@ -7,7 +7,7 @@ argocd-config:
     createNamespace: false
     targetNamespace: "jules-project"
     applications:
-     - name: "spmeight"
-       path: "dev/spmeight-argocd/spmeight"
+     - name: "spm"
+       path: "dev/spmeight-argocd/spm"
        type: helm
      
