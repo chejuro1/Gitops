@@ -8,6 +8,6 @@ argocd-config:
     targetNamespace: "jules-project"
     applications:
      - name: "spmeight"
-       path: "dev/spm-argocd/spmeight"
+       path: "dev/spmeight-argocd/spmeight"
        type: helm
      
