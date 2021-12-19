@@ -14,9 +14,9 @@ global:
     imagePrefix: ''
     imageTag: 0.0.1
     pullPolicy: Always
-#  imagePullSecret:
-#    secretName: 'ocp-registry-access'
-#    username: '<user Name>'
+  imagePullSecret:
+   secretName: 'registry-access'
+   username: 'iamapikey'
   database:
     ## Database connection properties
     type: DB2
