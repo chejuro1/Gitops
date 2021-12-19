@@ -8,15 +8,15 @@
 global:
   license: accept # Set to 'accept' after reviewing all license agreements
   images:
-    registry: &imageRegistry default-route-openshift-image-registry.roks-workload-ocp-public-ed1a03814f096c1e0c48d0de41f5ae2b-0000.ca-tor.containers.appdomain.cloud
-    # registry: &imageRegistry image-registry.openshift-image-registry.svc:5000  
+    # registry: &imageRegistry default-route-openshift-image-registry.roks-workload-ocp-public-ed1a03814f096c1e0c48d0de41f5ae2b-0000.ca-tor.containers.appdomain.cloud
+    registry: &imageRegistry image-registry.openshift-image-registry.svc:5000  
     imageLibrary: 'jules-project'
     imagePrefix: ''
     imageTag: 0.0.1
     pullPolicy: Always
-  imagePullSecret:
-   secretName: 'registry-access'
-   username: 'iamapikey'
+  # imagePullSecret:
+  #  secretName: 'registry-access'
+  #  username: 'iamapikey'
   database:
     ## Database connection properties
     type: DB2
