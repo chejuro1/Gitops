@@ -8,6 +8,6 @@ argocd-config:
     targetNamespace: "uat-deploy"
     applications:
      - name: "spm"
-       path: "qa/spmeight-argocd/spm"
+       path: "uat-deploy/spmeight-argocd/spm"
        type: helm
      
