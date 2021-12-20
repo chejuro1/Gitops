@@ -8,15 +8,15 @@
 global:
   license: accept # Set to 'accept' after reviewing all license agreements
   images:
-#    registry: &imageRegistry default-route-openshift-image-registry.apps.ocp4aws1.aws.chspm.net
+    # registry: &imageRegistry default-route-openshift-image-registry.roks-workload-ocp-public-ed1a03814f096c1e0c48d0de41f5ae2b-0000.ca-tor.containers.appdomain.cloud
     registry: &imageRegistry image-registry.openshift-image-registry.svc:5000  
-    imageLibrary: 'ocp'
+    imageLibrary: 'uat-deploy'
     imagePrefix: ''
-    imageTag: latest
+    imageTag: 0.0.1
     pullPolicy: Always
-#  imagePullSecret:
-#    secretName: 'ocp-registry-access'
-#    username: '<user Name>'
+  # imagePullSecret:
+  #  secretName: 'registry-access'
+  #  username: 'iamapikey'
   database:
     ## Database connection properties
     type: DB2
@@ -103,7 +103,7 @@ web: {}
 #   ingressPath: /CuramStatic
 # Override values in 'xmlserver' Chart
 xmlserver: {}
-#   replicaCount: 1
+#  replicaCount: 1
 #   jvm:
 #      maxMemory: '-Djava.maxmemory=768m'
 #      threadStackSize: '-Djava.thread.stack.size=-Xss4m'
