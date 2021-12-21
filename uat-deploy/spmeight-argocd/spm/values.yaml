@@ -10,7 +10,7 @@ global:
   images:
     # registry: &imageRegistry default-route-openshift-image-registry.roks-workload-ocp-public-ed1a03814f096c1e0c48d0de41f5ae2b-0000.ca-tor.containers.appdomain.cloud
     registry: &imageRegistry image-registry.openshift-image-registry.svc:5000  
-    imageLibrary: 'uat-deploy'
+    imageLibrary: 'jules-project'
     imagePrefix: ''
     imageTag: 0.0.1
     pullPolicy: Always
