@@ -12,7 +12,7 @@ global:
     registry: &imageRegistry image-registry.openshift-image-registry.svc:5000  
     imageLibrary: 'jules-project'
     imagePrefix: ''
-    imageTag: 
+    imageTag: 0.0.2
     pullPolicy: Always
   # imagePullSecret:
   #  secretName: 'registry-access'
